@@ -9,48 +9,27 @@
 <body class="dark">
 
 <header>
-    <img src="assets/logo.png" alt="WeatherNomad Logo" class="logo">
+    <img src="assets/logo.png" class="logo" alt="WeatherNomad">
     <h1>WeatherNomad Dashboard</h1>
+    <div id="dayNight" class="day-night">🌞 Dag</div>
 </header>
+
+<section class="map-section">
+    <iframe 
+        src="https://www.openstreetmap.org/export/embed.html?bbox=3.8,51.8,5.2,52.4&layer=mapnik"
+        loading="lazy">
+    </iframe>
+</section>
 
 <main>
     <div class="weather-container">
 
-        <div class="weather-card" id="Den+Haag">
-            <h2>Den Haag</h2>
-            <div class="condition"></div>
-            <div class="weather-graphical"></div>
-        </div>
-
-        <div class="weather-card" id="Pijnacker">
-            <h2>Pijnacker</h2>
-            <div class="condition"></div>
-            <div class="weather-graphical"></div>
-        </div>
-
-        <div class="weather-card" id="Delft">
-            <h2>Delft</h2>
-            <div class="condition"></div>
-            <div class="weather-graphical"></div>
-        </div>
-
-        <div class="weather-card" id="Rijswijk">
-            <h2>Rijswijk</h2>
-            <div class="condition"></div>
-            <div class="weather-graphical"></div>
-        </div>
-
-        <div class="weather-card" id="Schiphol">
-            <h2>Schiphol Airport</h2>
-            <div class="condition"></div>
-            <div class="weather-graphical"></div>
-        </div>
-
-        <div class="weather-card" id="Rotterdam">
-            <h2>Rotterdam Airport</h2>
-            <div class="condition"></div>
-            <div class="weather-graphical"></div>
-        </div>
+        <div class="weather-card" id="Den+Haag"><h2>Den Haag</h2><div class="condition"></div><div class="weather-graphical"></div></div>
+        <div class="weather-card" id="Pijnacker"><h2>Pijnacker</h2><div class="condition"></div><div class="weather-graphical"></div></div>
+        <div class="weather-card" id="Delft"><h2>Delft</h2><div class="condition"></div><div class="weather-graphical"></div></div>
+        <div class="weather-card" id="Rijswijk"><h2>Rijswijk</h2><div class="condition"></div><div class="weather-graphical"></div></div>
+        <div class="weather-card" id="Schiphol"><h2>Schiphol Airport</h2><div class="condition"></div><div class="weather-graphical"></div></div>
+        <div class="weather-card" id="Rotterdam"><h2>Rotterdam Airport</h2><div class="condition"></div><div class="weather-graphical"></div></div>
 
     </div>
 </main>
