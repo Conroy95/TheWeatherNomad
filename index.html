@@ -3,38 +3,62 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>The Weather Nomad Dashboard</title>
-
-    <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#00a4e4">
-
+    <title>WeatherNomad Dashboard</title>
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
+    <header>
+        <img src="assets/logo.png" alt="WeatherNomad Logo" class="logo">
+        <h1>WeatherNomad Dashboard</h1>
+        <div class="datetime" id="datetime">--</div>
+    </header>
 
-<header>
-    <img src="assets/logo.png" class="logo" alt="WeatherNomad Logo">
-    <h1>The Weather Nomad</h1>
-    <div class="datetime">
-        <span id="dayNight">🌞</span>
-        <span id="dateTime"></span>
-    </div>
-</header>
+    <main>
+        <div class="weather-container">
 
-<main>
-    <div class="weather-container" id="weatherContainer"></div>
-</main>
+            <div class="weather-card" id="denhaag-card">
+                <h2>Den Haag</h2>
+                <div class="condition" id="denhaag-condition">--</div>
+                <div class="weather-graphical" id="denhaag-graphical"></div>
+            </div>
 
-<footer>
-    <span>Laatste update: <strong id="lastUpdate">--:--</strong></span>
-</footer>
+            <div class="weather-card" id="pijnacker-card">
+                <h2>Pijnacker</h2>
+                <div class="condition" id="pijnacker-condition">--</div>
+                <div class="weather-graphical" id="pijnacker-graphical"></div>
+            </div>
 
-<script src="js/script.js"></script>
-<script>
-if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('service-worker.js');
-}
-</script>
+            <div class="weather-card" id="delft-card">
+                <h2>Delft</h2>
+                <div class="condition" id="delft-condition">--</div>
+                <div class="weather-graphical" id="delft-graphical"></div>
+            </div>
 
+            <div class="weather-card" id="rijswijk-card">
+                <h2>Rijswijk</h2>
+                <div class="condition" id="rijswijk-condition">--</div>
+                <div class="weather-graphical" id="rijswijk-graphical"></div>
+            </div>
+
+            <div class="weather-card" id="schiphol-card">
+                <h2>Schiphol Airport</h2>
+                <div class="condition" id="schiphol-condition">--</div>
+                <div class="weather-graphical" id="schiphol-graphical"></div>
+            </div>
+
+            <div class="weather-card" id="rotterdam-card">
+                <h2>Rotterdam Airport</h2>
+                <div class="condition" id="rotterdam-condition">--</div>
+                <div class="weather-graphical" id="rotterdam-graphical"></div>
+            </div>
+
+        </div>
+    </main>
+
+    <footer>
+        <div id="last-updated">Laatst bijgewerkt: --</div>
+    </footer>
+
+    <script src="js/script.js"></script>
 </body>
 </html>
