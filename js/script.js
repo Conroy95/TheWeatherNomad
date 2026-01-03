@@ -1,5 +1,5 @@
 const locations = [
-    "Den+Haag",
+    "Den Haag",
     "Pijnacker",
     "Delft",
     "Rijswijk",
@@ -9,75 +9,73 @@ const locations = [
 
 const container = document.getElementById("weatherContainer");
 const lastUpdateEl = document.getElementById("lastUpdate");
-const datetimeEl = document.getElementById("datetime");
 
-/* DAG / NACHT + DATUM TIJD */
-function updateDateTime() {
-    const now = new Date();
-    const hours = now.getHours();
-    const isNight = hours < 6 || hours >= 20;
-    datetimeEl.innerHTML = `${now.toLocaleDateString('nl-NL')} ${now.toLocaleTimeString('nl-NL')} ${isNight ? "🌙 Nacht" : "☀️ Dag"}`;
-}
-setInterval(updateDateTime, 1000);
-updateDateTime();
-
-/* WEER LADEN */
 async function loadWeather() {
     container.innerHTML = "";
 
-    for (const loc of locations) {
-        const res = await fetch(`https://wttr.in/${loc}?format=%t;%f;%p;%w;%h;%C;%d`);
+    for (const city of locations) {
+        const res = await fetch(
+            `https://wttr.in/${city}?format=%t;%f;%p;%w;%h;%C;%d`
+        );
         const text = await res.text();
         const [temp, feels, precip, wind, humidity, condition, windDir] = text.split(";");
 
-        const windDeg = parseInt(windDir) || 0;
-
-        const card = document.createElement("div");
-        card.className = "weather-card";
-        card.innerHTML = `
-            <h2>${loc.replace("+"," ")}</h2>
+        container.innerHTML += `
+        <div class="weather-card">
+            <h2>${city}</h2>
             <div class="condition">${condition}</div>
-            <div class="weather-grid">
-                <div class="block">
+
+            <div class="info-grid">
+                <div class="info">
                     <img src="https://img.icons8.com/fluency/48/temperature.png">
-                    <div class="value">${temp}</div>
-                    <div class="label">Temperatuur</div>
+                    <div>Temperatuur</div>
+                    <strong>${temp}</strong>
                 </div>
-                <div class="block">
+                <div class="info">
                     <img src="https://img.icons8.com/fluency/48/thermometer.png">
-                    <div class="value">${feels}</div>
-                    <div class="label">Voelt als</div>
+                    <div>Voelt als</div>
+                    <strong>${feels}</strong>
                 </div>
-                <div class="block">
+                <div class="info">
                     <img src="https://img.icons8.com/fluency/48/rain.png">
-                    <div class="value">${precip}</div>
-                    <div class="label">Neerslag</div>
+                    <div>Neerslag</div>
+                    <strong>${precip}</strong>
                 </div>
-                <div class="block">
+                <div class="info">
                     <img src="https://img.icons8.com/fluency/48/wind.png">
-                    <div class="value">${wind}</div>
-                    <div class="label">Wind</div>
-                    <img class="wind-arrow" src="https://img.icons8.com/ios-filled/50/navigation.png"
-                         style="transform: rotate(${windDeg}deg);">
+                    <div>Wind</div>
+                    <strong>${wind}</strong>
                 </div>
-                <div class="block">
+                <div class="info">
                     <img src="https://img.icons8.com/fluency/48/humidity.png">
-                    <div class="value">${humidity}</div>
-                    <div class="label">Luchtvochtigheid</div>
+                    <div>Luchtvochtigheid</div>
+                    <strong>${humidity}</strong>
                 </div>
-                <div class="block">
-                    <img src="https://img.icons8.com/fluency/48/sun.png">
-                    <div class="value">—</div>
-                    <div class="label">Zon</div>
+                <div class="info">
+                    <img src="https://img.icons8.com/fluency/48/compass.png">
+                    <div>Windrichting</div>
+                    <strong>${windDir}</strong>
                 </div>
             </div>
-        `;
-        container.appendChild(card);
+        </div>`;
     }
 
-    lastUpdateEl.innerText = `Laatst bijgewerkt: ${new Date().toLocaleTimeString('nl-NL')}`;
+    lastUpdateEl.innerText = new Date().toLocaleTimeString("nl-NL");
 }
 
-/* INIT + AUTO REFRESH (10 MIN) */
+function updateDateTime() {
+    const now = new Date();
+    document.getElementById("dateTime").innerText =
+        now.toLocaleDateString("nl-NL") + " " + now.toLocaleTimeString("nl-NL");
+
+    document.getElementById("dayNight").innerText =
+        now.getHours() >= 6 && now.getHours() < 18 ? "🌞" : "🌙";
+}
+
+// Initial load
 loadWeather();
+updateDateTime();
+
+// Auto refresh elke 10 minuten
 setInterval(loadWeather, 600000);
+setInterval(updateDateTime, 1000);
