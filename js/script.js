@@ -7,70 +7,77 @@ const locations = [
     "Rotterdam"
 ];
 
+const container = document.getElementById("weatherContainer");
+const lastUpdateEl = document.getElementById("lastUpdate");
+const datetimeEl = document.getElementById("datetime");
+
+/* DAG / NACHT + DATUM TIJD */
 function updateDateTime() {
     const now = new Date();
     const hours = now.getHours();
-    document.getElementById("daynight").textContent = (hours >= 6 && hours < 18) ? "🌞" : "🌙";
-    document.getElementById("datetime").textContent =
-        now.toLocaleDateString("nl-NL", { weekday: 'long', day: 'numeric', month: 'long' }) +
-        " • " +
-        now.toLocaleTimeString("nl-NL", { hour: '2-digit', minute: '2-digit' });
+    const isNight = hours < 6 || hours >= 20;
+    datetimeEl.innerHTML = `${now.toLocaleDateString('nl-NL')} ${now.toLocaleTimeString('nl-NL')} ${isNight ? "🌙 Nacht" : "☀️ Dag"}`;
 }
+setInterval(updateDateTime, 1000);
+updateDateTime();
 
-async function loadWeather(city) {
-    const card = document.getElementById(city);
-    const condition = card.querySelector(".condition");
-    const container = card.querySelector(".weather-graphical");
+/* WEER LADEN */
+async function loadWeather() {
+    container.innerHTML = "";
 
-    try {
-        const data = await fetch(
-            `https://wttr.in/${city}?format=%t;%f;%p;%w;%D;%h;%C`
-        ).then(r => r.text());
+    for (const loc of locations) {
+        const res = await fetch(`https://wttr.in/${loc}?format=%t;%f;%p;%w;%h;%C;%d`);
+        const text = await res.text();
+        const [temp, feels, precip, wind, humidity, condition, windDir] = text.split(";");
 
-        const [temp, feels, precip, wind, windDir, humidity, cond] = data.split(";");
+        const windDeg = parseInt(windDir) || 0;
 
-        condition.textContent = cond;
-
-        container.innerHTML = `
-            <div class="icon-block">
-                <img src="https://img.icons8.com/fluency/48/temperature.png">
-                <span>${temp}</span><br>Temperatuur
-            </div>
-            <div class="icon-block">
-                <img src="https://img.icons8.com/fluency/48/thermometer.png">
-                <span>${feels}</span><br>Voelt als
-            </div>
-            <div class="icon-block">
-                <img src="https://img.icons8.com/fluency/48/rain.png">
-                <span>${precip}</span><br>Neerslag
-            </div>
-            <div class="icon-block">
-                <img src="https://img.icons8.com/fluency/48/wind.png">
-                <span>${wind}</span><br>Wind
-            </div>
-            <div class="icon-block">
-                <img src="https://img.icons8.com/fluency/48/compass.png">
-                <span>${windDir}</span><br>Windrichting
-            </div>
-            <div class="icon-block">
-                <img src="https://img.icons8.com/fluency/48/humidity.png">
-                <span>${humidity}</span><br>Luchtvochtigheid
+        const card = document.createElement("div");
+        card.className = "weather-card";
+        card.innerHTML = `
+            <h2>${loc.replace("+"," ")}</h2>
+            <div class="condition">${condition}</div>
+            <div class="weather-grid">
+                <div class="block">
+                    <img src="https://img.icons8.com/fluency/48/temperature.png">
+                    <div class="value">${temp}</div>
+                    <div class="label">Temperatuur</div>
+                </div>
+                <div class="block">
+                    <img src="https://img.icons8.com/fluency/48/thermometer.png">
+                    <div class="value">${feels}</div>
+                    <div class="label">Voelt als</div>
+                </div>
+                <div class="block">
+                    <img src="https://img.icons8.com/fluency/48/rain.png">
+                    <div class="value">${precip}</div>
+                    <div class="label">Neerslag</div>
+                </div>
+                <div class="block">
+                    <img src="https://img.icons8.com/fluency/48/wind.png">
+                    <div class="value">${wind}</div>
+                    <div class="label">Wind</div>
+                    <img class="wind-arrow" src="https://img.icons8.com/ios-filled/50/navigation.png"
+                         style="transform: rotate(${windDeg}deg);">
+                </div>
+                <div class="block">
+                    <img src="https://img.icons8.com/fluency/48/humidity.png">
+                    <div class="value">${humidity}</div>
+                    <div class="label">Luchtvochtigheid</div>
+                </div>
+                <div class="block">
+                    <img src="https://img.icons8.com/fluency/48/sun.png">
+                    <div class="value">—</div>
+                    <div class="label">Zon</div>
+                </div>
             </div>
         `;
-    } catch (e) {
-        condition.textContent = "Data niet beschikbaar";
+        container.appendChild(card);
     }
+
+    lastUpdateEl.innerText = `Laatst bijgewerkt: ${new Date().toLocaleTimeString('nl-NL')}`;
 }
 
-function loadAll() {
-    updateDateTime();
-    locations.forEach(loadWeather);
-}
-
-loadAll();
-
-/* ⏱️ elke 10 minuten verversen */
-setInterval(loadAll, 600000);
-
-/* ⏰ klok elke minuut bijwerken */
-setInterval(updateDateTime, 60000);
+/* INIT + AUTO REFRESH (10 MIN) */
+loadWeather();
+setInterval(loadWeather, 600000);
