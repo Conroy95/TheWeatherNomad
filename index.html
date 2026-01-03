@@ -9,58 +9,17 @@
 <body>
 
 <header>
-    <img src="assets/logo.png" class="logo" alt="WeatherNomad Logo">
+    <img src="assets/logo.png" alt="WeatherNomad Logo" class="logo">
     <h1>WeatherNomad Dashboard</h1>
-    <div class="datetime">
-        <span id="daynight">🌞</span>
-        <span id="datetime">--</span>
-    </div>
+    <div id="datetime" class="datetime"></div>
 </header>
 
 <main>
-    <div class="weather-container">
-
-        <div class="weather-card" id="Den+Haag">
-            <h2>Den Haag</h2>
-            <div class="condition"></div>
-            <div class="weather-graphical"></div>
-        </div>
-
-        <div class="weather-card" id="Pijnacker">
-            <h2>Pijnacker</h2>
-            <div class="condition"></div>
-            <div class="weather-graphical"></div>
-        </div>
-
-        <div class="weather-card" id="Delft">
-            <h2>Delft</h2>
-            <div class="condition"></div>
-            <div class="weather-graphical"></div>
-        </div>
-
-        <div class="weather-card" id="Rijswijk">
-            <h2>Rijswijk</h2>
-            <div class="condition"></div>
-            <div class="weather-graphical"></div>
-        </div>
-
-        <div class="weather-card" id="Schiphol">
-            <h2>Schiphol Airport</h2>
-            <div class="condition"></div>
-            <div class="weather-graphical"></div>
-        </div>
-
-        <div class="weather-card" id="Rotterdam">
-            <h2>Rotterdam Airport</h2>
-            <div class="condition"></div>
-            <div class="weather-graphical"></div>
-        </div>
-
-    </div>
+    <div class="weather-container" id="weatherContainer"></div>
 </main>
 
 <footer>
-    <p>© 2026 WeatherNomad • Data via wttr.in</p>
+    <div id="lastUpdate">Laatst bijgewerkt: --</div>
 </footer>
 
 <script src="js/script.js"></script>
