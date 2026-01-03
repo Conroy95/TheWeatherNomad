@@ -13,8 +13,15 @@ const windIconMap = {
     "S":"180","SSW":"202.5","SW":"225","WSW":"247.5","W":"270","WNW":"292.5","NW":"315","NNW":"337.5"
 };
 
+// Fade-in animatie via CSS class
+function fadeInCard(cardId){
+    const card = document.getElementById(cardId);
+    card.style.opacity = 0;
+    card.style.transition = "opacity 0.5s ease-in-out";
+    requestAnimationFrame(()=>card.style.opacity = 1);
+}
+
 // ---------------- Instant Load ----------------
-// Render lege kaarten zodat de layout direct zichtbaar is
 function renderEmptyCards(){
     locations.forEach(loc=>{
         const cardEl = document.getElementById(loc.graphical);
@@ -38,84 +45,88 @@ function updateDateTime(){
 setInterval(updateDateTime, 1000);
 updateDateTime();
 
-// ---------------- Fetch Weather ----------------
-async function refreshWeather(){
+// ---------------- Fetch per locatie (parallel) ----------------
+async function fetchWeather(location){
     try {
-        const locationNames = locations.map(l => l.name).join("+");
-        const format = "%t;%f;%p;%w;%h;%S+%s;%C;%D";
-        const data = await fetch(`https://wttr.in/${locationNames}?format=${format}`).then(r=>r.text());
+        const {name, card, condition, graphical} = location;
+        const format = "%t;%f;%p;%w;%h;%S+%s;%C;%D"; // temp;feels;precip;wind;humidity;sun;cond;windDir
+        const res = await fetch(`https://wttr.in/${name}?format=${format}`).then(r=>r.text());
+        const [temp, feels, precip, wind, humidity, sun, condText, windDir] = res.split(";");
 
-        const allData = data.split("\n");
-        allData.forEach((line, idx)=>{
-            const loc = locations[idx];
-            const [temp, feels, precip, wind, humidity, sun, condText, windDir] = line.split(";");
+        document.getElementById(condition).innerText = condText;
 
-            const cardEl = document.getElementById(loc.card);
-            document.getElementById(loc.condition).innerText = condText;
+        const windDeg = windIconMap[windDir] || 0;
 
-            const windDeg = windIconMap[windDir] || 0;
+        const html = `
+        <div class="icon-block">
+            <img src="assets/icons/temperature.png"/>
+            <span>${temp}</span>
+            <div class="icon-label">Temperatuur</div>
+            <div class="meter"><div style="width:${parseInt(temp)||0*4}%"></div></div>
+        </div>
+        <div class="icon-block">
+            <img src="assets/icons/thermometer.png"/>
+            <span>${feels}</span>
+            <div class="icon-label">Voelt als</div>
+            <div class="meter"><div style="width:${parseInt(feels)||0*4}%"></div></div>
+        </div>
+        <div class="icon-block">
+            <img src="assets/icons/rain.png"/>
+            <span>${precip}</span>
+            <div class="icon-label">Neerslag</div>
+            <div class="meter"><div style="width:${parseFloat(precip)||0*5}%"></div></div>
+        </div>
+        <div class="icon-block">
+            <img src="assets/icons/wind.png" style="transform:rotate(${windDeg}deg)"/>
+            <span>${wind} ${windDir}</span>
+            <div class="icon-label">Wind</div>
+            <div class="meter"><div style="width:${parseInt(wind)||0}%"></div></div>
+        </div>
+        <div class="icon-block">
+            <img src="assets/icons/humidity.png"/>
+            <span>${humidity}</span>
+            <div class="icon-label">Luchtvochtigheid</div>
+            <div class="meter"><div style="width:${parseInt(humidity)||0}%"></div></div>
+        </div>
+        <div class="icon-block">
+            <img src="assets/icons/sun.png"/>
+            <span>${sun}</span>
+            <div class="icon-label">Zon op/onder</div>
+        </div>
+        `;
 
-            const html = `
-            <div class="icon-block">
-                <img src="assets/icons/temperature.png"/>
-                <span>${temp}</span>
-                <div class="icon-label">Temperatuur</div>
-                <div class="meter"><div style="width:${parseInt(temp)||0*4}%"></div></div>
-            </div>
-            <div class="icon-block">
-                <img src="assets/icons/thermometer.png"/>
-                <span>${feels}</span>
-                <div class="icon-label">Voelt als</div>
-                <div class="meter"><div style="width:${parseInt(feels)||0*4}%"></div></div>
-            </div>
-            <div class="icon-block">
-                <img src="assets/icons/rain.png"/>
-                <span>${precip}</span>
-                <div class="icon-label">Neerslag</div>
-                <div class="meter"><div style="width:${parseFloat(precip)||0*5}%"></div></div>
-            </div>
-            <div class="icon-block">
-                <img src="assets/icons/wind.png" style="transform:rotate(${windDeg}deg)"/>
-                <span>${wind} ${windDir}</span>
-                <div class="icon-label">Wind</div>
-                <div class="meter"><div style="width:${parseInt(wind)||0}%"></div></div>
-            </div>
-            <div class="icon-block">
-                <img src="assets/icons/humidity.png"/>
-                <span>${humidity}</span>
-                <div class="icon-label">Luchtvochtigheid</div>
-                <div class="meter"><div style="width:${parseInt(humidity)||0}%"></div></div>
-            </div>
-            <div class="icon-block">
-                <img src="assets/icons/sun.png"/>
-                <span>${sun}</span>
-                <div class="icon-label">Zon op/onder</div>
-            </div>
-            `;
+        document.getElementById(graphical).innerHTML = html;
 
-            document.getElementById(loc.graphical).innerHTML = html;
+        // Achtergrond kleur
+        const cardEl = document.getElementById(card);
+        if(condText.toLowerCase().includes("rain")){
+            cardEl.style.background = "#00a4e450";
+        } else if(condText.toLowerCase().includes("cloud")){
+            cardEl.style.background = "#fbb03420";
+        } else if(condText.toLowerCase().includes("sun") || condText.toLowerCase().includes("clear")){
+            cardEl.style.background = "#fbb03440";
+        } else {
+            cardEl.style.background = "#f0f4f820";
+        }
 
-            // Achtergrond kleur
-            if(condText.toLowerCase().includes("rain")){
-                cardEl.style.background = "#00a4e450";
-            } else if(condText.toLowerCase().includes("cloud")){
-                cardEl.style.background = "#fbb03420";
-            } else if(condText.toLowerCase().includes("sun") || condText.toLowerCase().includes("clear")){
-                cardEl.style.background = "#fbb03440";
-            } else {
-                cardEl.style.background = "#f0f4f820";
-            }
-        });
-
-        // Update "Laatst bijgewerkt"
-        const updatedEl = document.getElementById('last-updated');
-        updatedEl.innerText = `Laatst bijgewerkt: ${new Date().toLocaleTimeString('nl-NL')}`;
+        // Fade-in animatie
+        fadeInCard(card);
 
     } catch(err){
-        console.error("Weather fetch error:", err);
+        console.error(`Error fetching weather for ${location.name}:`, err);
     }
 }
 
-// Initial async update & refresh every 10 minuten
-refreshWeather();
-setInterval(refreshWeather, 10*60*1000);
+// ---------------- Refresh alle kaarten parallel ----------------
+function refreshAllWeather(){
+    const promises = locations.map(loc => fetchWeather(loc));
+    Promise.all(promises).then(()=>{
+        // Update "Laatst bijgewerkt"
+        const updatedEl = document.getElementById('last-updated');
+        updatedEl.innerText = `Laatst bijgewerkt: ${new Date().toLocaleTimeString('nl-NL')}`;
+    });
+}
+
+// Initial async update + refresh every 10 minuten
+refreshAllWeather();
+setInterval(refreshAllWeather, 10*60*1000);
