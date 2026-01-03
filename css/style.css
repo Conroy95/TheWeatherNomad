@@ -1,7 +1,8 @@
-/* THEMA */
 body.dark {
     background: #0f172a;
     color: #e5e7eb;
+    margin: 0;
+    font-family: Arial, sans-serif;
 }
 
 /* HEADER */
@@ -12,28 +13,38 @@ header {
 }
 
 .logo {
-    width: 180px;
-    margin-bottom: 0.3rem;
+    width: 200px;
 }
 
 h1 {
-    margin: 0;
-    font-size: 2rem;
+    margin: 0.3rem 0;
 }
 
-/* LAYOUT */
+.day-night {
+    font-weight: bold;
+    color: #020617;
+}
+
+/* MAP */
+.map-section iframe {
+    width: 100%;
+    height: 220px;
+    border: none;
+}
+
+/* WEATHER */
 .weather-container {
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
-    padding: 1rem;
     gap: 1rem;
+    padding: 1rem;
 }
 
 .weather-card {
     background: #020617;
-    border-radius: 16px;
     width: 360px;
+    border-radius: 16px;
     padding: 1rem;
     box-shadow: 0 10px 25px rgba(0,0,0,0.6);
 }
@@ -45,11 +56,10 @@ h1 {
 
 .condition {
     color: #fbb034;
+    margin-bottom: 0.6rem;
     font-weight: bold;
-    margin-bottom: 0.8rem;
 }
 
-/* ICON BLOKKEN */
 .weather-graphical {
     display: flex;
     flex-wrap: wrap;
@@ -61,45 +71,37 @@ h1 {
     width: 45%;
     background: rgba(255,255,255,0.05);
     border-radius: 12px;
-    padding: 0.7rem;
+    padding: 0.6rem;
     text-align: center;
 }
 
 .icon-block img {
-    width: 48px;
+    width: 42px;
 }
 
 .icon-value {
-    font-size: 1.2rem;
     color: #00a4e4;
     font-weight: bold;
+    font-size: 1.1rem;
 }
 
 .icon-label {
-    font-size: 0.85rem;
+    font-size: 0.8rem;
     opacity: 0.8;
 }
 
 /* FOOTER */
 footer {
-    margin-top: 1rem;
-    padding: 0.8rem;
     background: #020617;
+    padding: 0.8rem;
     display: flex;
     justify-content: space-between;
-    font-size: 0.85rem;
+    font-size: 0.8rem;
     color: #94a3b8;
 }
 
-/* MOBIEL */
-@media (max-width: 600px) {
-    .weather-card {
-        width: 95%;
-    }
-    .logo {
-        width: 140px;
-    }
-    h1 {
-        font-size: 1.6rem;
-    }
+/* MOBILE */
+@media (max-width:600px){
+    .weather-card { width: 95%; }
+    .logo { width: 150px; }
 }
