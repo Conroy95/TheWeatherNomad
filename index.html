@@ -3,15 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WeatherNomad Dashboard</title>
+    <title>The Weather Nomad Dashboard</title>
+
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#00a4e4">
+
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
 
 <header>
-    <img src="assets/logo.png" alt="WeatherNomad Logo" class="logo">
-    <h1>WeatherNomad Dashboard</h1>
-    <div id="datetime" class="datetime"></div>
+    <img src="assets/logo.png" class="logo" alt="WeatherNomad Logo">
+    <h1>The Weather Nomad</h1>
+    <div class="datetime">
+        <span id="dayNight">🌞</span>
+        <span id="dateTime"></span>
+    </div>
 </header>
 
 <main>
@@ -19,9 +26,15 @@
 </main>
 
 <footer>
-    <div id="lastUpdate">Laatst bijgewerkt: --</div>
+    <span>Laatste update: <strong id="lastUpdate">--:--</strong></span>
 </footer>
 
 <script src="js/script.js"></script>
+<script>
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('service-worker.js');
+}
+</script>
+
 </body>
 </html>
