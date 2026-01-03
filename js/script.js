@@ -24,9 +24,8 @@ function fadeInCard(cardId){
 // ---------------- Instant Load ----------------
 function renderEmptyCards(){
     locations.forEach(loc=>{
-        const cardEl = document.getElementById(loc.graphical);
-        cardEl.innerHTML = '';
         document.getElementById(loc.condition).innerText = "--";
+        document.getElementById(loc.graphical).innerHTML = '';
     });
 }
 renderEmptyCards();
@@ -45,19 +44,23 @@ function updateDateTime(){
 setInterval(updateDateTime, 1000);
 updateDateTime();
 
-// ---------------- Fetch per locatie (parallel) ----------------
+// ---------------- Fetch weather per locatie ----------------
 async function fetchWeather(location){
+    const {name, card, condition, graphical} = location;
     try {
-        const {name, card, condition, graphical} = location;
-        // Correct format: temp;feels;precip;wind;humidity;cond;windDir;sun
         const format = "%t;%f;%p;%w;%h;%C;%D;%S+%s";
         const res = await fetch(`https://wttr.in/${name}?format=${format}`).then(r=>r.text());
+        if(!res) throw new Error("Geen data ontvangen");
+
         const [temp, feels, precip, wind, humidity, condText, windDir, sun] = res.split(";");
 
-        document.getElementById(condition).innerText = condText;
+        // Update conditie
+        document.getElementById(condition).innerText = condText || "--";
 
+        // Wind rotatie
         const windDeg = windIconMap[windDir] || 0;
 
+        // Update grafische weergave
         const html = `
         <div class="icon-block">
             <img src="assets/icons/temperature.png"/>
@@ -110,21 +113,24 @@ async function fetchWeather(location){
             cardEl.style.background = "#f0f4f820";
         }
 
+        // Fade-in
         fadeInCard(card);
+
     } catch(err){
-        console.error(`Error fetching weather for ${location.name}:`, err);
+        console.error(`Error fetching weather for ${name}:`, err);
+        document.getElementById(condition).innerText = "--";
+        document.getElementById(graphical).innerHTML = `<div style="color:#999">Data niet beschikbaar</div>`;
     }
 }
 
-// ---------------- Refresh alle kaarten parallel ----------------
+// ---------------- Refresh alle locaties async ----------------
 function refreshAllWeather(){
-    const promises = locations.map(loc => fetchWeather(loc));
-    Promise.all(promises).then(()=>{
-        const updatedEl = document.getElementById('last-updated');
-        updatedEl.innerText = `Laatst bijgewerkt: ${new Date().toLocaleTimeString('nl-NL')}`;
-    });
+    locations.forEach(loc => fetchWeather(loc));
+    // Update laatste update time
+    const updatedEl = document.getElementById('last-updated');
+    updatedEl.innerText = `Laatst bijgewerkt: ${new Date().toLocaleTimeString('nl-NL')}`;
 }
 
-// Initial async update + refresh elke 10 minuten
+// Initial load + elke 10 minuten
 refreshAllWeather();
 setInterval(refreshAllWeather, 10*60*1000);
