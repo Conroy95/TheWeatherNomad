@@ -48,6 +48,7 @@ updateDateTime();
 async function fetchWeather(location){
     const {name, card, condition, graphical} = location;
     try {
+        // Correct format: temp;feels;precip;wind;humidity;cond;windDir;sun
         const format = "%t;%f;%p;%w;%h;%C;%D;%S+%s";
         const res = await fetch(`https://wttr.in/${name}?format=${format}`).then(r=>r.text());
         if(!res) throw new Error("Geen data ontvangen");
@@ -60,7 +61,7 @@ async function fetchWeather(location){
         // Wind rotatie
         const windDeg = windIconMap[windDir] || 0;
 
-        // Update grafische weergave
+        // Grafische weergave strikt gescheiden
         const html = `
         <div class="icon-block">
             <img src="assets/icons/temperature.png"/>
@@ -113,7 +114,6 @@ async function fetchWeather(location){
             cardEl.style.background = "#f0f4f820";
         }
 
-        // Fade-in
         fadeInCard(card);
 
     } catch(err){
@@ -126,7 +126,6 @@ async function fetchWeather(location){
 // ---------------- Refresh alle locaties async ----------------
 function refreshAllWeather(){
     locations.forEach(loc => fetchWeather(loc));
-    // Update laatste update time
     const updatedEl = document.getElementById('last-updated');
     updatedEl.innerText = `Laatst bijgewerkt: ${new Date().toLocaleTimeString('nl-NL')}`;
 }
