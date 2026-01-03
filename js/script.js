@@ -27,87 +27,117 @@ const windIconMap = {
     "S":"180","SSW":"202.5","SW":"225","WSW":"247.5","W":"270","WNW":"292.5","NW":"315","NNW":"337.5"
 };
 
-// Create weather cards
-async function refreshWeather(){
+// Build HTML for a single location
+function buildCardHTML(data) {
+    const {temp, feels, precip, wind, humidity, sun, condText, windDir} = data;
+    const windDeg = windIconMap[windDir] || 0;
+
+    return `
+    <div class="icon-block">
+        <img src="assets/icons/temperature.png"/>
+        <span>${temp}</span>
+        <div class="icon-label">Temperatuur</div>
+        <div class="meter"><div style="width:${parseInt(temp)||0*4}%"></div></div>
+    </div>
+    <div class="icon-block">
+        <img src="assets/icons/thermometer.png"/>
+        <span>${feels}</span>
+        <div class="icon-label">Voelt als</div>
+        <div class="meter"><div style="width:${parseInt(feels)||0*4}%"></div></div>
+    </div>
+    <div class="icon-block">
+        <img src="assets/icons/rain.png"/>
+        <span>${precip}</span>
+        <div class="icon-label">Neerslag</div>
+        <div class="meter"><div style="width:${parseFloat(precip)||0*5}%"></div></div>
+    </div>
+    <div class="icon-block">
+        <img src="assets/icons/wind.png" style="transform:rotate(${windDeg}deg)"/>
+        <span>${wind} ${windDir}</span>
+        <div class="icon-label">Wind</div>
+        <div class="meter"><div style="width:${parseInt(wind)||0}%"></div></div>
+    </div>
+    <div class="icon-block">
+        <img src="assets/icons/humidity.png"/>
+        <span>${humidity}</span>
+        <div class="icon-label">Luchtvochtigheid</div>
+        <div class="meter"><div style="width:${parseInt(humidity)||0}%"></div></div>
+    </div>
+    <div class="icon-block">
+        <img src="assets/icons/sun.png"/>
+        <span>${sun}</span>
+        <div class="icon-label">Zon op/onder</div>
+    </div>
+    `;
+}
+
+// Render cached data instantly
+function renderCachedData() {
+    const cached = localStorage.getItem("weatherData");
+    if(!cached) return;
+    const allData = JSON.parse(cached);
+    allData.forEach((data, idx) => {
+        const loc = locations[idx];
+        document.getElementById(loc.condition).innerText = data.condText;
+        document.getElementById(loc.graphical).innerHTML = buildCardHTML(data);
+
+        // Achtergrond kleur
+        const cardEl = document.getElementById(loc.card);
+        const condText = data.condText.toLowerCase();
+        if(condText.includes("rain")) cardEl.style.background = "#00a4e450";
+        else if(condText.includes("cloud")) cardEl.style.background = "#fbb03420";
+        else if(condText.includes("sun") || condText.includes("clear")) cardEl.style.background = "#fbb03440";
+        else cardEl.style.background = "#f0f4f820";
+    });
+
+    // Update last updated time
+    const updatedEl = document.getElementById('last-updated');
+    updatedEl.innerText = `Laatst bijgewerkt: ${localStorage.getItem("weatherTimestamp") || '--'}`;
+}
+
+// Fetch new data and update DOM + cache
+async function fetchWeatherData() {
     try {
-        // Combine all location names into één fetch
         const locationNames = locations.map(l => l.name).join("+");
-        const format = "%t;%f;%p;%w;%h;%S+%s;%C;%D"; // temp;feels;precip;wind;humidity;sun;cond;windDir
-        const data = await fetch(`https://wttr.in/${locationNames}?format=${format}`).then(r=>r.text());
+        const format = "%t;%f;%p;%w;%h;%S+%s;%C;%D";
+        const response = await fetch(`https://wttr.in/${locationNames}?format=${format}`);
+        const text = await response.text();
+        const allDataRaw = text.split("\n");
 
-        // wttr.in returnt meerdere locaties gescheiden door newlines
-        const allData = data.split("\n");
-        allData.forEach((line, idx) => {
-            const loc = locations[idx];
+        const allData = allDataRaw.map(line => {
             const [temp, feels, precip, wind, humidity, sun, condText, windDir] = line.split(";");
-
-            const cardEl = document.getElementById(loc.card);
-            document.getElementById(loc.condition).innerText = condText;
-
-            const windDeg = windIconMap[windDir] || 0;
-
-            const html = `
-            <div class="icon-block">
-                <img src="assets/icons/temperature.png"/>
-                <span>${temp}</span>
-                <div class="icon-label">Temperatuur</div>
-                <div class="meter"><div style="width:${parseInt(temp)||0*4}%"></div></div>
-            </div>
-            <div class="icon-block">
-                <img src="assets/icons/thermometer.png"/>
-                <span>${feels}</span>
-                <div class="icon-label">Voelt als</div>
-                <div class="meter"><div style="width:${parseInt(feels)||0*4}%"></div></div>
-            </div>
-            <div class="icon-block">
-                <img src="assets/icons/rain.png"/>
-                <span>${precip}</span>
-                <div class="icon-label">Neerslag</div>
-                <div class="meter"><div style="width:${parseFloat(precip)||0*5}%"></div></div>
-            </div>
-            <div class="icon-block">
-                <img src="assets/icons/wind.png" style="transform:rotate(${windDeg}deg)"/>
-                <span>${wind} ${windDir}</span>
-                <div class="icon-label">Wind</div>
-                <div class="meter"><div style="width:${parseInt(wind)||0}%"></div></div>
-            </div>
-            <div class="icon-block">
-                <img src="assets/icons/humidity.png"/>
-                <span>${humidity}</span>
-                <div class="icon-label">Luchtvochtigheid</div>
-                <div class="meter"><div style="width:${parseInt(humidity)||0}%"></div></div>
-            </div>
-            <div class="icon-block">
-                <img src="assets/icons/sun.png"/>
-                <span>${sun}</span>
-                <div class="icon-label">Zon op/onder</div>
-            </div>
-            `;
-
-            document.getElementById(loc.graphical).innerHTML = html;
-
-            // Achtergrond kleur
-            if(condText.toLowerCase().includes("rain")){
-                cardEl.style.background = "#00a4e450";
-            } else if(condText.toLowerCase().includes("cloud")){
-                cardEl.style.background = "#fbb03420";
-            } else if(condText.toLowerCase().includes("sun") || condText.toLowerCase().includes("clear")){
-                cardEl.style.background = "#fbb03440";
-            } else {
-                cardEl.style.background = "#f0f4f820";
-            }
+            return {temp, feels, precip, wind, humidity, sun, condText, windDir};
         });
 
-        // Update "Laatst bijgewerkt"
-        const updatedEl = document.getElementById('last-updated');
+        // Update DOM
+        allData.forEach((data, idx) => {
+            const loc = locations[idx];
+            document.getElementById(loc.condition).innerText = data.condText;
+            document.getElementById(loc.graphical).innerHTML = buildCardHTML(data);
+
+            const cardEl = document.getElementById(loc.card);
+            const condText = data.condText.toLowerCase();
+            if(condText.includes("rain")) cardEl.style.background = "#00a4e450";
+            else if(condText.includes("cloud")) cardEl.style.background = "#fbb03420";
+            else if(condText.includes("sun") || condText.includes("clear")) cardEl.style.background = "#fbb03440";
+            else cardEl.style.background = "#f0f4f820";
+        });
+
+        // Cache data
+        localStorage.setItem("weatherData", JSON.stringify(allData));
         const now = new Date();
-        updatedEl.innerText = `Laatst bijgewerkt: ${now.toLocaleTimeString('nl-NL')}`;
+        const timeString = now.toLocaleTimeString('nl-NL');
+        localStorage.setItem("weatherTimestamp", timeString);
+        document.getElementById('last-updated').innerText = `Laatst bijgewerkt: ${timeString}`;
 
     } catch(err) {
         console.error("Weather fetch error:", err);
     }
 }
 
-// Initial load & refresh every 10 minuten
-refreshWeather();
-setInterval(refreshWeather, 10*60*1000);
+// Initial load
+renderCachedData();
+fetchWeatherData();
+
+// Refresh every 10 minuten
+setInterval(fetchWeatherData, 10*60*1000);
