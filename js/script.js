@@ -7,7 +7,24 @@ const locations = [
     {name:'Rotterdam', card:'rotterdam-card', condition:'rotterdam-condition', graphical:'rotterdam-graphical'}
 ];
 
-// Update date/time header
+// Mapping wind direction to degrees
+const windIconMap = {
+    "N":"0","NNE":"22.5","NE":"45","ENE":"67.5","E":"90","ESE":"112.5","SE":"135","SSE":"157.5",
+    "S":"180","SSW":"202.5","SW":"225","WSW":"247.5","W":"270","WNW":"292.5","NW":"315","NNW":"337.5"
+};
+
+// ---------------- Instant Load ----------------
+// Render lege kaarten zodat de layout direct zichtbaar is
+function renderEmptyCards(){
+    locations.forEach(loc=>{
+        const cardEl = document.getElementById(loc.graphical);
+        cardEl.innerHTML = '';
+        document.getElementById(loc.condition).innerText = "--";
+    });
+}
+renderEmptyCards();
+
+// ---------------- Date/Time Header ----------------
 function updateDateTime(){
     const dtEl = document.getElementById('datetime');
     const now = new Date();
@@ -21,23 +38,15 @@ function updateDateTime(){
 setInterval(updateDateTime, 1000);
 updateDateTime();
 
-// Mapping wind direction to degrees
-const windIconMap = {
-    "N":"0","NNE":"22.5","NE":"45","ENE":"67.5","E":"90","ESE":"112.5","SE":"135","SSE":"157.5",
-    "S":"180","SSW":"202.5","SW":"225","WSW":"247.5","W":"270","WNW":"292.5","NW":"315","NNW":"337.5"
-};
-
-// Create weather cards
+// ---------------- Fetch Weather ----------------
 async function refreshWeather(){
     try {
-        // Combine all location names into één fetch
         const locationNames = locations.map(l => l.name).join("+");
-        const format = "%t;%f;%p;%w;%h;%S+%s;%C;%D"; // temp;feels;precip;wind;humidity;sun;cond;windDir
+        const format = "%t;%f;%p;%w;%h;%S+%s;%C;%D";
         const data = await fetch(`https://wttr.in/${locationNames}?format=${format}`).then(r=>r.text());
 
-        // wttr.in returnt meerdere locaties gescheiden door newlines
         const allData = data.split("\n");
-        allData.forEach((line, idx) => {
+        allData.forEach((line, idx)=>{
             const loc = locations[idx];
             const [temp, feels, precip, wind, humidity, sun, condText, windDir] = line.split(";");
 
@@ -100,14 +109,13 @@ async function refreshWeather(){
 
         // Update "Laatst bijgewerkt"
         const updatedEl = document.getElementById('last-updated');
-        const now = new Date();
-        updatedEl.innerText = `Laatst bijgewerkt: ${now.toLocaleTimeString('nl-NL')}`;
+        updatedEl.innerText = `Laatst bijgewerkt: ${new Date().toLocaleTimeString('nl-NL')}`;
 
-    } catch(err) {
+    } catch(err){
         console.error("Weather fetch error:", err);
     }
 }
 
-// Initial load & refresh every 10 minuten
+// Initial async update & refresh every 10 minuten
 refreshWeather();
 setInterval(refreshWeather, 10*60*1000);
