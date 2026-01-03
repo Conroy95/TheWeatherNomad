@@ -1,17 +1,19 @@
+:root {
+    --orange: #fbb034;
+    --blue: #00a4e4;
+}
+
 body {
     margin: 0;
     font-family: Arial, sans-serif;
-    background: linear-gradient(#f0f4f8, #ffffff);
-    color: #333;
+    background: linear-gradient(#eef6fb, #ffffff);
 }
 
-/* HEADER */
 header {
-    background: linear-gradient(90deg, #fbb034, #00a4e4);
-    color: white;
     text-align: center;
     padding: 1rem;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.25);
+    background: linear-gradient(90deg, var(--orange), var(--blue));
+    color: white;
 }
 
 .logo {
@@ -25,96 +27,56 @@ h1 {
 }
 
 .datetime {
-    margin-top: 0.3rem;
-    font-size: 0.95rem;
-    opacity: 0.9;
+    margin-top: 0.5rem;
+    font-size: 1rem;
 }
 
-/* WEATHER CARDS */
 .weather-container {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
     gap: 1rem;
     padding: 1rem;
 }
 
 .weather-card {
     background: white;
-    width: 360px;
-    border-radius: 18px;
+    border-radius: 16px;
     padding: 1rem;
-    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
-    transition: transform 0.3s;
-}
-
-.weather-card:hover {
-    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.15);
 }
 
 .weather-card h2 {
-    color: #00a4e4;
+    color: var(--blue);
     margin-top: 0;
 }
 
 .condition {
-    color: #fbb034;
+    color: var(--orange);
     font-weight: bold;
-    margin-bottom: 0.8rem;
+    margin-bottom: 0.5rem;
 }
 
-.weather-grid {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.6rem;
-    justify-content: space-between;
+.info-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.7rem;
 }
 
-.block {
-    width: 48%;
+.info {
     background: #fbb03415;
     border-radius: 12px;
     padding: 0.6rem;
     text-align: center;
 }
 
-.block img {
+.info img {
     width: 40px;
 }
 
-.value {
-    font-weight: bold;
-    color: #00a4e4;
-}
-
-.label {
-    font-size: 0.8rem;
-}
-
-/* WIND DIRECTION */
-.wind-arrow {
-    width: 30px;
-    transform-origin: center;
-}
-
-/* FOOTER */
 footer {
+    background: var(--blue);
+    color: white;
     text-align: center;
     padding: 0.8rem;
-    background: #00a4e4;
-    color: white;
     font-size: 0.9rem;
-}
-
-/* RESPONSIVE */
-@media (max-width: 600px) {
-    .weather-card {
-        width: 95%;
-    }
-    .block {
-        width: 100%;
-    }
-    .logo {
-        width: 150px;
-    }
 }
