@@ -13,7 +13,7 @@ const windIconMap = {
     "S":"180","SSW":"202.5","SW":"225","WSW":"247.5","W":"270","WNW":"292.5","NW":"315","NNW":"337.5"
 };
 
-// Fade-in animatie via CSS class
+// Fade-in animatie
 function fadeInCard(cardId){
     const card = document.getElementById(cardId);
     card.style.opacity = 0;
@@ -49,9 +49,10 @@ updateDateTime();
 async function fetchWeather(location){
     try {
         const {name, card, condition, graphical} = location;
-        const format = "%t;%f;%p;%w;%h;%S+%s;%C;%D"; // temp;feels;precip;wind;humidity;sun;cond;windDir
+        // Correct format: temp;feels;precip;wind;humidity;cond;windDir;sun
+        const format = "%t;%f;%p;%w;%h;%C;%D;%S+%s";
         const res = await fetch(`https://wttr.in/${name}?format=${format}`).then(r=>r.text());
-        const [temp, feels, precip, wind, humidity, sun, condText, windDir] = res.split(";");
+        const [temp, feels, precip, wind, humidity, condText, windDir, sun] = res.split(";");
 
         document.getElementById(condition).innerText = condText;
 
@@ -109,9 +110,7 @@ async function fetchWeather(location){
             cardEl.style.background = "#f0f4f820";
         }
 
-        // Fade-in animatie
         fadeInCard(card);
-
     } catch(err){
         console.error(`Error fetching weather for ${location.name}:`, err);
     }
@@ -121,12 +120,11 @@ async function fetchWeather(location){
 function refreshAllWeather(){
     const promises = locations.map(loc => fetchWeather(loc));
     Promise.all(promises).then(()=>{
-        // Update "Laatst bijgewerkt"
         const updatedEl = document.getElementById('last-updated');
         updatedEl.innerText = `Laatst bijgewerkt: ${new Date().toLocaleTimeString('nl-NL')}`;
     });
 }
 
-// Initial async update + refresh every 10 minuten
+// Initial async update + refresh elke 10 minuten
 refreshAllWeather();
 setInterval(refreshAllWeather, 10*60*1000);
