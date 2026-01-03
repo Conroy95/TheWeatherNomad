@@ -7,70 +7,70 @@ const locations = [
     "Rotterdam"
 ];
 
-function icon(name) {
-    return `https://img.icons8.com/fluency/48/000000/${name}.png`;
+function updateDateTime() {
+    const now = new Date();
+    const hours = now.getHours();
+    document.getElementById("daynight").textContent = (hours >= 6 && hours < 18) ? "🌞" : "🌙";
+    document.getElementById("datetime").textContent =
+        now.toLocaleDateString("nl-NL", { weekday: 'long', day: 'numeric', month: 'long' }) +
+        " • " +
+        now.toLocaleTimeString("nl-NL", { hour: '2-digit', minute: '2-digit' });
 }
 
-/* DAG / NACHT */
-(function dayNight(){
-    const hour = new Date().getHours();
-    const el = document.getElementById("dayNight");
-    if(hour >= 6 && hour < 18){
-        el.textContent = "🌞 Dag";
-    } else {
-        el.textContent = "🌙 Nacht";
-    }
-})();
-
-async function loadWeather(city){
+async function loadWeather(city) {
     const card = document.getElementById(city);
-    const condEl = card.querySelector(".condition");
-    const dataEl = card.querySelector(".weather-graphical");
+    const condition = card.querySelector(".condition");
+    const container = card.querySelector(".weather-graphical");
 
     try {
-        const res = await fetch(`https://wttr.in/${city}?format=%t;%f;%p;%w;%h;%C;%W`);
-        const [t,f,p,w,h,c,wd] = (await res.text()).split(";");
+        const data = await fetch(
+            `https://wttr.in/${city}?format=%t;%f;%p;%w;%D;%h;%C`
+        ).then(r => r.text());
 
-        condEl.textContent = c;
+        const [temp, feels, precip, wind, windDir, humidity, cond] = data.split(";");
 
-        dataEl.innerHTML = `
-            ${block("temperature", t, "Temperatuur")}
-            ${block("thermometer", f, "Voelt als")}
-            ${block("rain", p, "Neerslag")}
-            ${block("wind", w, "Wind")}
-            ${block("compass", wd, "Windrichting")}
-            ${block("humidity", h, "Luchtvochtigheid")}
+        condition.textContent = cond;
+
+        container.innerHTML = `
+            <div class="icon-block">
+                <img src="https://img.icons8.com/fluency/48/temperature.png">
+                <span>${temp}</span><br>Temperatuur
+            </div>
+            <div class="icon-block">
+                <img src="https://img.icons8.com/fluency/48/thermometer.png">
+                <span>${feels}</span><br>Voelt als
+            </div>
+            <div class="icon-block">
+                <img src="https://img.icons8.com/fluency/48/rain.png">
+                <span>${precip}</span><br>Neerslag
+            </div>
+            <div class="icon-block">
+                <img src="https://img.icons8.com/fluency/48/wind.png">
+                <span>${wind}</span><br>Wind
+            </div>
+            <div class="icon-block">
+                <img src="https://img.icons8.com/fluency/48/compass.png">
+                <span>${windDir}</span><br>Windrichting
+            </div>
+            <div class="icon-block">
+                <img src="https://img.icons8.com/fluency/48/humidity.png">
+                <span>${humidity}</span><br>Luchtvochtigheid
+            </div>
         `;
-    }
-    catch {
-        /* FALLBACK */
-        dataEl.innerHTML = `
-            <iframe 
-                src="https://weatherwidget.io/w/?id=${city}&lang=nl"
-                style="width:100%;border:none;height:200px">
-            </iframe>`;
-        condEl.textContent = "Fallback actief";
+    } catch (e) {
+        condition.textContent = "Data niet beschikbaar";
     }
 }
 
-function block(iconName, value, label){
-    return `
-        <div class="icon-block">
-            <img src="${icon(iconName)}">
-            <div class="icon-value">${value}</div>
-            <div class="icon-label">${label}</div>
-        </div>`;
-}
-
-function loadAll(){
+function loadAll() {
+    updateDateTime();
     locations.forEach(loadWeather);
-    document.getElementById("updated").textContent =
-        "Laatst bijgewerkt: " + new Date().toLocaleTimeString("nl-NL");
 }
 
-/* INIT */
 loadAll();
+
+/* ⏱️ elke 10 minuten verversen */
 setInterval(loadAll, 600000);
 
-/* KIOSK FULLSCREEN */
-document.documentElement.requestFullscreen?.();
+/* ⏰ klok elke minuut bijwerken */
+setInterval(updateDateTime, 60000);
